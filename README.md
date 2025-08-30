@@ -1,2 +1,3 @@
-## 🎥 Project Video
-[[Watch the video]([https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg](https://youtu.be/71IZqhI8C18))]
+
+## 🎥 Project Preview
+[![Watch the video](https://img.youtube.com/vi/71IZqhI8C18/0.jpg)](https://www.youtube.com/watch?v=71IZqhI8C18)
