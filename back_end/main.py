@@ -4,37 +4,46 @@ import json
 from config.model_config import Gemini20, Gemini25
 from typing import Optional
 from dataclasses import dataclass
-from src.agents.planning_agent import planning_agent
+from src.agents import *
 from config.model_config import *
+from src.models.user_context import UserContext
 
-@dataclass
-class UserContext:
-    email: Optional[str] = None
-    username: Optional[str] = None
-    user_email: Optional[str] = None
-    deep_search: Optional[bool] = False
 
-def special_prompt(local_context: RunContextWrapper[UserContext], agent) -> str:
-    user = local_context.context or UserContext(email="", username="")
+# def special_prompt(local_context: RunContextWrapper[UserContext], agent) -> str:
+#     user = local_context.context or UserContext(email="", username="")
     
-    has_user_info = (
-        bool(user.username and user.username.strip()) and
-        bool(user.email and user.email.strip())
-    )
+#     has_user_info = (
+#         bool(user.username and user.username.strip()) and
+#         bool(user.email and user.email.strip())
+#     )
 
 
-    if has_user_info:
-        # print("Only User Enable")
-        return f"""You are a Requirement Gathering Agent and your responsibilit is collect all infomation from user if its unclear or incomplete as well as you have to
-          Greet the user {user.username} and answer like you are familiar.
-          Ones you gather all the information delegate to `planning_agent`."""
+#     if has_user_info:
+#         # print("Only User Enable")
+#         return f"""
+#         You are a Requirement Gathering Agent
+        
+#         your responsibilit is collect all infomation from user and understand properly.
 
-    # print("Nothing Enable")
-    return "You are a helpful assistant."
+#         If its unclear or incomplete ask from the user about what you not understand, as well as you have to
+#         Greet the user {user.username} and answer like you are familiar.
+
+#         Ones you gather all the information you most to delegate to the `planning_agent`."""
+
+#     # print("Nothing Enable")
+#     return f"""
+#             You are a Requirement Gathering Agent
+        
+#             your responsibilit is collect all infomation from user and understand properly.
+
+#             If its unclear or incomplete ask from the user about what you not understand.
+
+#             Ones you gather all the information you most to delegate to the `planning_agent`.
+#             """
 
 
 
-requirement_gathering_agent = Agent(name="Requirement_Gathering", instructions=special_prompt, handoffs=[planning_agent], model=Gemini25)
+# requirement_gathering_agent = Agent(name="Requirement_Gathering", instructions=special_prompt, handoffs=[planning_agent], model=Gemini25)
 
 async def call_agent(requestData):
     # Extract fields safely with dot notation
@@ -51,6 +60,8 @@ async def call_agent(requestData):
 
 #_____________________WORKING CURRENT CODE____________________________
 
+
+    print(f"[DEEP SEARCH STATUS]: {deep_search}")
     
 
     # Pass query to agent
@@ -71,6 +82,7 @@ async def call_agent(requestData):
         if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
             yield f"data: {json.dumps({'type': 'content', 'delta': event.data.delta})}\n\n"
             
+        # print(f"\n\n[All Events]: {event} \n\n")
 
         if event.type == "run_item_stream_event" and isinstance(event, RunItemStreamEvent):
             if event.name == "tool_output" and isinstance(event.item, ToolCallOutputItem):

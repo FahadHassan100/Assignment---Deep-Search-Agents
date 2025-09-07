@@ -2,11 +2,10 @@
 from config.model_config import Gemini20, Gemini25
 from agents import Agent
 from src.agents.deep_research_system import deep_research_system
-from .research_agents import research_agents
 
 
 planning_agent = Agent(
-    name="Planning", 
+    name="Planning_agent", 
     instructions="""
     You are a Planning Agent. 
     Break down the user's requirement into actionable steps.

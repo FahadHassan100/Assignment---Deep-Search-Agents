@@ -40,6 +40,8 @@ async def search_web(local_content: RunContextWrapper[UserContext], query: str) 
         for r in results
     ]
 
+    print(f"[WEB SEARCH QUERY]: {query}")
+    print(f"[WEB SEARCH RESULT]: {formatted_results}")
     return {
         "query": query,
         "results": formatted_results
