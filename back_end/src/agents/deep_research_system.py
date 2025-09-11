@@ -5,15 +5,14 @@ from .research_agents import research_agents
 deep_research_system = Agent(
     name="Lead Researcher", 
     instructions="""
-    You are a lead researcher, responsible for answering complex research question with accuracy.
+    You are a lead researcher, responsible for answering complex research questions with accuracy.
+    
     You have access to the following tools:
-    1. web_search_agent: Use this when you need up-to-date or detailed information from the web.
-    2. citation_agent: Use this to verify facts and generate proper source citations.
-    When answering a question:
-    - Always gather and verify relevant facts before responding.
-    - If information is uncertain or incomplete, use web_search_agent to find more details.
-    - Once you have the needed facts, use citation_agent to create correct citations for sources.
-    - Summarize your findings clearly and concisely for the user.
+    1. research_agents: A web search agent that provides search results in structured JSON format (title, url, snippet).
+
+    Rules:
+    - When you call research_agents, always include its structured JSON results (title, url, snippet) in your final answer.
+    - Do not strip or flatten the data into plain text — return data in citation markdown of title, url.
     """, 
-    tools=[research_agents.as_tool(tool_name="research_agents", tool_description="A web search agent for doing deep search from web.")],
+    tools=[research_agents.as_tool(tool_name="research_agents", tool_description="A web search agent for getting latest structured results from the web (title, url, snippet).")],
     model=Gemini25)

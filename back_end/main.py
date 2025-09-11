@@ -1,6 +1,6 @@
-from agents import Agent, Runner, RunContextWrapper, RunItemStreamEvent, ToolCallOutputItem
+from agents import Agent, Runner, RunContextWrapper, RunItemStreamEvent, ToolCallOutputItem, function_tool
 from openai.types.responses import ResponseTextDeltaEvent
-import json
+import json, re
 from config.model_config import Gemini20, Gemini25
 from typing import Optional
 from dataclasses import dataclass
@@ -8,41 +8,56 @@ from src.agents import *
 from config.model_config import *
 from src.models.user_context import UserContext
 
+link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\)]+)\)")
 
-# def special_prompt(local_context: RunContextWrapper[UserContext], agent) -> str:
-#     user = local_context.context or UserContext(email="", username="")
+@function_tool()
+async def search_web(local_content: RunContextWrapper[UserContext], query: str) -> dict:
+    # print(f"Search query is:{query} and SOME DATA {local_content.context}")
+    # return "No Data found"
+    print("\n\n THIS IS TAVILY RESPONSE\n")
+    response = tavily_client.search(query)
+    results = response.get("results", [])
     
-#     has_user_info = (
-#         bool(user.username and user.username.strip()) and
-#         bool(user.email and user.email.strip())
-#     )
+    if not results:
+        return {"results": [], "message": "No results found."}
+        # return "No results found."
+
+    # return all results instead of just top one
+    formatted_results = [
+        {
+            "title": r.get("title", "No title"),
+            "url": r.get("url", "No link"),
+            "snippet": r.get("content", "No content")
+        }
+        for r in results
+    ]
+
+    return {
+        "query": query,
+        "results": formatted_results
+    }
 
 
-#     if has_user_info:
-#         # print("Only User Enable")
-#         return f"""
-#         You are a Requirement Gathering Agent
-        
-#         your responsibilit is collect all infomation from user and understand properly.
-
-#         If its unclear or incomplete ask from the user about what you not understand, as well as you have to
-#         Greet the user {user.username} and answer like you are familiar.
-
-#         Ones you gather all the information you most to delegate to the `planning_agent`."""
-
-#     # print("Nothing Enable")
-#     return f"""
-#             You are a Requirement Gathering Agent
-        
-#             your responsibilit is collect all infomation from user and understand properly.
-
-#             If its unclear or incomplete ask from the user about what you not understand.
-
-#             Ones you gather all the information you most to delegate to the `planning_agent`.
-#             """
+def special_prompt(local_context: RunContextWrapper[UserContext], agent) -> str:
+    user = local_context.context or UserContext(email="", username="")
+    
+    has_user_info = (
+        bool(user.username and user.username.strip()) and
+        bool(user.email and user.email.strip())
+    )
 
 
+    if has_user_info:
+        # print("Only User Enable")
+        return f"""You are a Requirement Gathering Agent and your responsibilit is collect all infomation from user if its unclear or incomplete as well as you have to
+          Greet the user {user.username} and answer like you are familiar.
+          Ones you gather all the information delegate to `planning_agent`."""
 
+    # print("Nothing Enable")
+    return "You are a helpful assistant."
+
+
+# agent = Agent(name="Requirement_Gathering", instructions=special_prompt, tools=[search_web], model=Gemini25)
 # requirement_gathering_agent = Agent(name="Requirement_Gathering", instructions=special_prompt, handoffs=[planning_agent], model=Gemini25)
 
 async def call_agent(requestData):
@@ -60,8 +75,6 @@ async def call_agent(requestData):
 
 #_____________________WORKING CURRENT CODE____________________________
 
-
-    print(f"[DEEP SEARCH STATUS]: {deep_search}")
     
 
     # Pass query to agent
@@ -84,17 +97,46 @@ async def call_agent(requestData):
             
         # print(f"\n\n[All Events]: {event} \n\n")
 
-        if event.type == "run_item_stream_event" and isinstance(event, RunItemStreamEvent):
-            if event.name == "tool_output" and isinstance(event.item, ToolCallOutputItem):
-                tool_output = event.item.output   
-                # print("\n[TOOL RESULT DICT]:", tool_output)
+        # Tool outputs
+        if event.type == "run_item_stream_event" and isinstance(event.item, ToolCallOutputItem):
+            tool_output = event.item.output
 
-                resources = [
-                    {"title": r["title"], "url": r["url"]}
-                    for r in tool_output.get("results", [])
-                ]
+            resources = []
 
+            # Case 1: structured dict (from search_web)
+            if isinstance(tool_output, dict):
+                for r in tool_output.get("results", []):
+                    resources.append({
+                        "title": r.get("title", "No title"),
+                        "url": r.get("url", "No url"),
+                        "snippet": r.get("snippet", "No snippet")
+                    })
+
+            # Case 2: markdown string with links
+            elif isinstance(tool_output, str):
+                matches = link_pattern.findall(tool_output)
+                for title, url in matches:
+                    resources.append({"title": title, "url": url})
+
+            # print("\n\n[ALL RESOURCES]: ",resources)
+            if resources:
                 yield f"data: {json.dumps({'type': 'resources', 'resources': resources})}\n\n"
+
+#____________________________________WITH OLD LOGIC WORKING____________________________________________________________        
+
+        # if event.type == "run_item_stream_event" and isinstance(event, RunItemStreamEvent):
+        #     if event.name == "tool_output" and isinstance(event.item, ToolCallOutputItem):
+        #         tool_output = event.item.output   
+        #         print("\n[TOOL RESULT DICT]:", tool_output)
+
+        #         resources = [
+        #             {"title": r["title"], "url": r["url"]}
+        #             for r in tool_output.get("results", [])
+        #         ]
+
+        #         print("\n[ALL RESOURCES]:", resources)
+
+        #         yield f"data: {json.dumps({'type': 'resources', 'resources': resources})}\n\n"
 
 #___________________________________________________________________________________________________
 

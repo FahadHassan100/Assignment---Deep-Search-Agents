@@ -40,7 +40,9 @@ export default function Home() {
   useEffect(() => {
     /* const checking = async () => {
       const getUrlPreview = await getWebsitePreview(
-        "https://www.deduxer.studio/blog/25-profitable-ai-business-ideas-best-ai-businesses-2024"
+        //"https://www.ibm.com/think/topics/prompt-engineering"
+        "https://cloud.google.com/discover/what-is-prompt-engineering"
+        //"https://www.deduxer.studio/blog/25-profitable-ai-business-ideas-best-ai-businesses-2024"
       );
       console.log(getUrlPreview);
     };
