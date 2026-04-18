@@ -1,5 +1,6 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from services.save_message import save_message
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -48,7 +49,12 @@ async def chat_with_llm(message: Message):
     """
     Stream the agent response back to the frontend
     """
+
     
+    save_message(message.dict())
+    
+    # print(f"USER MESSAGE: {message.dict()}")
+
     async def generate_response():
         async for chunk in call_agent(message):
             yield f"data: {json.dumps({'content': chunk, 'resources': []})}\n\n"

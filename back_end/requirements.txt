@@ -2,3 +2,6 @@ fastapi
 uvicorn
 openai-agents
 tavily-python
+asyncpg
+sqlmodal
+psycopg2-binary
