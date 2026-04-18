@@ -3,5 +3,5 @@ uvicorn
 openai-agents
 tavily-python
 asyncpg
-sqlmodal
+sqlmodel
 psycopg2-binary
