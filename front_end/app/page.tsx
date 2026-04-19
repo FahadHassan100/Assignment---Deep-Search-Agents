@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { ChatHeader } from "../components/ChatHeader";
-import { ActionButtons } from "../components/ActionButton";
 import { ChatInput } from "../components/ChatInput";
 import { Background } from "../components/Background";
 import { TopBar } from "../components/TopBar";
@@ -31,11 +30,10 @@ export default function Home() {
   const [inputValue, setInputValue] = useState("");
   const [showLight, setShowLight] = useState(false);
   const [inChatMode, setInChatMode] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
   const [deepSearch, setDeepSearch] = useState(false);
   const [chatCompletionStatus, setChatCompletionStatus] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const { userInfo, isSignedIn }: any = useUserContext();
+  const { userInfo, isSignedIn } = useUserContext();
 
   useEffect(() => {
     /* const checking = async () => {
@@ -89,6 +87,7 @@ export default function Home() {
         };
         setMessages((prev) => [...prev, aiMessage]);
 
+        //const response = await fetch("http://localhost:8000/chat", {
         const response = await fetch(
           "https://assignment-deep-search-agents.onrender.com/chat",
           {
@@ -145,7 +144,7 @@ export default function Home() {
                   const parsed = JSON.parse(data);
                   console.log("Parsed data:", parsed);
 
-                  const inner = parsed.content.replace(/^data:\s*/, "").trim();
+                  //const inner = parsed.content.replace(/^data:\s*/, "").trim();
                   console.log("[TESTING ABC]: ", parsed.content);
 
                   if (parsed.content && parsed.content !== "[DONE]") {
@@ -162,7 +161,7 @@ export default function Home() {
                         innerJson.resources
                       ) {
                         console.log("[ALL RESOURCES]", innerJson.resources);
-                        const sampleResources = getSampleResources();
+                        //const sampleResources = getSampleResources();
 
                         const enrichReso = async (resources: any[]) => {
                           return Promise.all(
@@ -261,7 +260,7 @@ export default function Home() {
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         throw new Error("No response body reader available");
       }
     }
@@ -271,16 +270,16 @@ export default function Home() {
     setDeepSearch(dsBtn);
   };
 
-  const getAIResponse = (query: string) => {
-    const responses = [
-      "I'm Y, your cryptocurrency assistant. How can I help you today?",
-      "That's an interesting question about crypto. Let me explain...",
-      "Based on the current market trends, I would suggest considering various factors before making any investment decisions.",
-      "The blockchain technology behind this cryptocurrency uses advanced consensus mechanisms to ensure security and efficiency.",
-      "I can help you understand more about DeFi, NFTs, or any other crypto topic you're interested in.",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  // const getAIResponse = (query: string) => {
+  //   const responses = [
+  //     "I'm Y, your cryptocurrency assistant. How can I help you today?",
+  //     "That's an interesting question about crypto. Let me explain...",
+  //     "Based on the current market trends, I would suggest considering various factors before making any investment decisions.",
+  //     "The blockchain technology behind this cryptocurrency uses advanced consensus mechanisms to ensure security and efficiency.",
+  //     "I can help you understand more about DeFi, NFTs, or any other crypto topic you're interested in.",
+  //   ];
+  //   return responses[Math.floor(Math.random() * responses.length)];
+  // };
 
   // Generate sample resources for demonstration
   const getSampleResources = (): Resource[] => {

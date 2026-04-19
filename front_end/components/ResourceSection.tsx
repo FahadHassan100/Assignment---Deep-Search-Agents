@@ -63,7 +63,7 @@ export function ResourceSection({ resources }: ResourceSectionProps) {
               target="_blank"
               rel="noopener noreferrer"
               className={`w-10 h-10 ${getIconColor(
-                resource.type
+                resource.type,
               )} rounded-full flex items-center justify-center text-white font-medium cursor-pointer`}
               whileHover={{
                 scale: 1.1,
