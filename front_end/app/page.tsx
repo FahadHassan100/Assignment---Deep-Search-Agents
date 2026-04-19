@@ -89,17 +89,20 @@ export default function Home() {
         };
         setMessages((prev) => [...prev, aiMessage]);
 
-        const response = await fetch("http://localhost:8000/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          "https://assignment-deep-search-agents.onrender.com/chat",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newMessage),
           },
-          body: JSON.stringify(newMessage),
-        });
+        );
 
         if (!response.ok) {
           throw new Error(
-            `Failed to get response from backend: ${response.status}`
+            `Failed to get response from backend: ${response.status}`,
           );
         }
 
@@ -165,7 +168,7 @@ export default function Home() {
                           return Promise.all(
                             resources.map(async (resources, index) => {
                               const urlData: any = await getWebsitePreview(
-                                resources.url
+                                resources.url,
                               );
                               return {
                                 id: String(index + 1),
@@ -174,16 +177,16 @@ export default function Home() {
                                 previewUrl: urlData.image ?? null,
                                 favicon: urlData.favicon ?? null,
                               };
-                            })
+                            }),
                           );
                         };
 
                         const allResourcesWithImage: any = await enrichReso(
-                          innerJson.resources
+                          innerJson.resources,
                         );
                         console.log(
                           "[RESOURCE CUSTOM DATE]:",
-                          await enrichReso(innerJson.resources)
+                          await enrichReso(innerJson.resources),
                         );
 
                         setMessages((prev) =>
@@ -193,8 +196,8 @@ export default function Home() {
                                   ...msg,
                                   resources: allResourcesWithImage,
                                 }
-                              : msg
-                          )
+                              : msg,
+                          ),
                         );
                       }
 
@@ -211,21 +214,21 @@ export default function Home() {
                                   ...msg,
                                   content: accumulatedContent,
                                 }
-                              : msg
-                          )
+                              : msg,
+                          ),
                         );
                       }
                     } catch (error) {
                       console.error(
                         "Failed to parse inner JSON:",
                         inner,
-                        error
+                        error,
                       );
                     }
                   } else if (parsed.content === "[DONE]") {
                     if (accumulatedContent === "") {
                       console.log(
-                        "No content received, showing fallback message"
+                        "No content received, showing fallback message",
                       );
                       setMessages((prev) =>
                         prev.map((msg) =>
@@ -235,8 +238,8 @@ export default function Home() {
                                 content:
                                   "Sorry, I couldn't generate a response. Please try again.",
                               }
-                            : msg
-                        )
+                            : msg,
+                        ),
                       );
                     }
                   }
@@ -249,8 +252,8 @@ export default function Home() {
                       prev.map((msg) =>
                         msg.id === aiMessageId
                           ? { ...msg, aiResponse: accumulatedContent }
-                          : msg
-                      )
+                          : msg,
+                      ),
                     );
                   }
                 }
